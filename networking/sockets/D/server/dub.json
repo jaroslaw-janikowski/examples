@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"bps"
+	],
+	"copyright": "Copyright © 2020, bps",
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "server"
+}
