@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<h4>Taski</h4>
+				<ul id="task-list">
+
+				</ul>
+			</div>
+			<div class="col-sm-6">
+				<h4>Zarządzanie taskami</h4>
+				<form class="form">
+					<div class="form-group">
+						<label class="form-label">nazwa</label>
+						<input id="task-form-name" class="form-control" type="text">
+					</div>
+					<button class="btn btn-primary" type="button" onclick="addTaskBtn.onClick()">Dodaj</button>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<h3>Log</h3>
+				<div class="form">
+					<div class="form-group">
+						<ul id="log">
+
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script type="text/javascript">
+
+var log = {
+	id: $('#log'),
+	info: function(text){
+		log.id.append('<li>'+text+'</li>');
+	}
+};
+
+class HttpPooler {
+	constructor(controllerUrl, interval=5){
+		this._controllerUrl = controllerUrl;
+		this._interval = interval;
+		this._tasks = {};
+	}
+
+	onPool(tasks){
+
+	}
+
+	addTask(taskId, counter){
+		var self = this;
+
+		return $.post(this._controllerUrl+'/add-task', {
+			name: taskId
+		}).done(function(response){
+			self._tasks[taskId] = {
+				counter: 0
+			};
+		});
+	}
+
+	start(){
+		var self = this;
+		var url = this._controllerUrl+'/pool';
+
+		setInterval(function(){
+			$.post(url, {}).done(function(response){
+				var j = JSON.parse(response);
+				self._tasks = j.tasks;
+				self.onPool(self._tasks);
+			});
+		}, this._interval*1000);
+	}
+}
+
+var taskList = {
+	obj: $('#task-list'),
+	addTask: function(taskId, counter=0){
+		htmlTask = $('<li id="task-'+taskId+'">'+taskId+': '+counter+'</li>');
+		taskList.obj.append(htmlTask);
+	},
+	updateTask: function(taskId, counter){
+		$('#task-'+taskId).text(taskId+': '+counter);
+	},
+	exists: function(taskId){
+		return $('#task-'+taskId).length > 0 ? true : false;
+	}
+};
+
+var pooler = new HttpPooler('http://127.0.0.1:5000', 5);
+pooler.onPool = function(tasks){
+	// uaktualnij liczniki
+	for (var taskId in tasks){
+		// jeśli nie ma to utwórz
+		if (!taskList.exists(taskId)){
+			taskList.addTask(taskId, 0);
+		}
+
+		taskList.updateTask(taskId, tasks[taskId]);
+	}
+};
+
+var addTaskBtn = {
+	onClick: function(){
+		var taskId = $('#task-form-name').val();
+		pooler.addTask(taskId, 0).done(function(){
+			taskList.addTask(taskId, 0);
+			log.info('Dodano nowe zadanie.');
+		});
+	}
+};
+
+$(document).ready(function(){
+	pooler.start();
+});
+
+</script>
+</body>
+</html>
