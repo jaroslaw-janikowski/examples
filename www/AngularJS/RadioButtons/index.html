@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+	<script type="text/javascript">
+		angular.module('app', []).controller('ctrl', function($scope){
+			$scope.a = {
+				selected: 9,
+				items: [43561, 2346, 4353, 464, 543, 65, 7, 834, 9, 140]
+			};
+		});
+	</script>
+</head>
+<body ng-app="app">
+	<div ng-controller="ctrl">
+		<div>Selected: {{ a.selected }}</div>
+		<ul>
+			<li ng-repeat="i in a.items">
+				<label><input type="radio" name="asdf" ng-value="i" ng-model="a.selected"> {{ i }}</label>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>
