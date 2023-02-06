@@ -15,4 +15,6 @@ for i in range(180):
 	t.circle(100)
 	t.lt(1)
 
-input()
+s.onkeypress(turtle.bye, 'Escape')
+s.listen()
+s.mainloop()
